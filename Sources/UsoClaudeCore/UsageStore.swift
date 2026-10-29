@@ -27,7 +27,7 @@ public final class UsageStore: ObservableObject {
     private(set) var timer: Timer?
     private var inFlight: Task<Void, Never>?
 
-    private static let refreshInterval: TimeInterval = 90
+    private static let refreshInterval: TimeInterval = 150
     private static let clickDebounce: TimeInterval = 10
     private static let accountClickDebounce: TimeInterval = 5
 

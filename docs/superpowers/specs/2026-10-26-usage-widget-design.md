@@ -59,7 +59,7 @@ Sucesso = olhar a janela por um segundo e saber qual conta usar, sem nunca mais 
 - Posição e estado do pin persistem em `UserDefaults`.
 - Cores dos anéis: verde < 50%, amarelo 50–80%, vermelho > 80%.
 - "Conta recomendada": a de menor % semanal. Se a diferença for menor que 5 pontos, desempata pela menor % de sessão. Conta com semanal ou sessão em 100% nunca é recomendada se a outra tiver folga. A recomendada ganha um contorno verde.
-- Atualização a cada 90 s, ao clicar em "Atualizar agora" e ao clicar na janela (com debounce de 10 s). O token é relido do Keychain a cada ciclo, para pegar renovações feitas pelo Claude Code.
+- Atualização a cada 150 s (era 90 s; aumentado para consultar a API com menos frequência), ao clicar em "Atualizar agora" e ao clicar na janela (com debounce de 10 s). O token é relido do Keychain a cada ciclo, para pegar renovações feitas pelo Claude Code.
 - Tempo até renovar: sessão como "em 2h40" (ou "—" se `resets_at` for null) e semana como "dom 22:00", no fuso local.
 - Estados por conta: carregando, ok, login vencido (401 ou `expiresAt` passado) e erro de rede (mantém os últimos números esmaecidos, com "sem conexão").
 - Contas definidas numa lista no código (rótulo + pasta). O serviço do Keychain é derivado pela regra do sufixo. Não há tela de cadastro.
