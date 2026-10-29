@@ -41,6 +41,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation, 
         menu.addItem(withTitle: "Atualizar agora", action: #selector(refreshNow), keyEquivalent: "").target = self
         menu.addItem(withTitle: "Tamanho original", action: #selector(resetZoom), keyEquivalent: "").target = self
         menu.addItem(.separator())
+        menu.addItem(withTitle: "Editar contas…", action: #selector(editAccounts), keyEquivalent: "").target = self
+        menu.addItem(.separator())
         menu.addItem(withTitle: "Ativar registro de horas…", action: #selector(activateHooks), keyEquivalent: "").target = self
         menu.addItem(withTitle: "Desativar registro de horas…", action: #selector(deactivateHooks), keyEquivalent: "").target = self
         menu.addItem(withTitle: "Enviar aviso de teste", action: #selector(sendTestAlert), keyEquivalent: "").target = self
@@ -58,6 +60,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation, 
         mainMenu.addItem(appItem)
         NSApp.mainMenu = mainMenu
 
+        if let warning = Account.loaded.warning { explainAccountsFile(warning) }
         store.start()
         hours.start()
         notes.start()
@@ -67,7 +70,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation, 
 
     /// Notificação de exemplo, para conferir a aparência e a permissão de notificações.
     @objc private func sendTestAlert() {
-        post(LimitAlert(title: "proteo: sessão em 96% (teste)",
+        post(LimitAlert(title: "\(Account.all.first?.label ?? "conta"): sessão em 96% (teste)",
                         body: "Renova em 2h40. Nenhuma outra conta com folga: claude renova qui 07:00."))
         UNUserNotificationCenter.current().getNotificationSettings { [weak self] settings in
             guard settings.authorizationStatus == .denied else { return }
@@ -161,7 +164,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation, 
         alert.messageText = active ? "Ativar registro de horas" : "Desativar registro de horas"
         alert.informativeText = active
             ? hours.previewText()
-            : "Os hooks do Uso Claude serão removidos dos settings.json das duas contas (com backup). Os outros hooks não são alterados."
+            : "Os hooks do Uso Claude serão removidos dos settings.json de todas as contas (com backup). Os outros hooks não são alterados."
         alert.addButton(withTitle: active ? "Ativar" : "Desativar")
         alert.addButton(withTitle: "Cancelar")
         guard alert.runModal() == .alertFirstButtonReturn else { return }
@@ -213,6 +216,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation, 
                   let bounds = CGRect(dictionaryRepresentation: boundsDict) else { return false }
             return bounds.intersects(ours)
         }
+    }
+
+    /// Abre o `accounts.json` no editor de texto; as contas são lidas só na abertura do app.
+    @objc private func editAccounts() {
+        let editor = URL(fileURLWithPath: "/System/Applications/TextEdit.app")
+        NSWorkspace.shared.open([AccountConfig.file], withApplicationAt: editor,
+                                configuration: NSWorkspace.OpenConfiguration())
+        let alert = NSAlert()
+        alert.messageText = "Editar contas"
+        alert.informativeText = "Cada conta é uma pasta de configuração do Claude Code. Salve o arquivo e reabra o Uso Claude "
+            + "para as mudanças valerem."
+        alert.runModal()
+    }
+
+    private func explainAccountsFile(_ warning: String) {
+        let alert = NSAlert()
+        alert.messageText = "Arquivo de contas com problema"
+        alert.informativeText = warning
+        alert.addButton(withTitle: "Abrir arquivo")
+        alert.addButton(withTitle: "Agora não")
+        NSApp.activate()
+        if alert.runModal() == .alertFirstButtonReturn { NSWorkspace.shared.open(AccountConfig.file) }
     }
 
     @objc private func resetZoom() {

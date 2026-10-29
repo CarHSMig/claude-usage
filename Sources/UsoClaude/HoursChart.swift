@@ -1,12 +1,19 @@
 import SwiftUI
 import UsoClaudeCore
 
+private let accountPalette: [Color] = [
+    Color(red: 0x6a / 255, green: 0xa7 / 255, blue: 0xff / 255),
+    Color(red: 0xc1 / 255, green: 0x8c / 255, blue: 0xff / 255),
+    Color(red: 0xff / 255, green: 0xa6 / 255, blue: 0x5c / 255),
+    Color(red: 0x4d / 255, green: 0xd0 / 255, blue: 0xc4 / 255),
+    Color(red: 0xff / 255, green: 0x7a / 255, blue: 0xb6 / 255),
+    Color(red: 0xe3 / 255, green: 0xc4 / 255, blue: 0x3b / 255),
+]
+
+/// Cor da conta pela ordem em `accounts.json`; nomes que não estão mais no arquivo (dados antigos) ficam cinza.
 func accountColor(_ label: String) -> Color {
-    switch label {
-    case "claude": Color(red: 0x6a / 255, green: 0xa7 / 255, blue: 0xff / 255)
-    case "proteo": Color(red: 0xc1 / 255, green: 0x8c / 255, blue: 0xff / 255)
-    default: Color(white: 0.6)
-    }
+    guard let index = Account.all.firstIndex(where: { $0.label == label }) else { return Color(white: 0.6) }
+    return accountPalette[index % accountPalette.count]
 }
 
 /// Barras empilhadas por conta (uma por hora no Dia, uma por dia nos demais), com tooltip no hover.
